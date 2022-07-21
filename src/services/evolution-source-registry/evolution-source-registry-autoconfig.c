@@ -706,7 +706,20 @@ evolution_source_registry_merge_autoconfig_sources (ESourceRegistryServer *serve
 	gchar *autoconfig_directory;
 	gint ii;
 
-	settings = g_settings_new ("org.gnome.evolution-data-server");
+	{
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 "org.gnome.evolution-data-server",
+							 FALSE);
+		settings = g_settings_new_full(schema, NULL, NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 
 	autoconfig_sources = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, e_autoconfig_free_merge_source_data);
 

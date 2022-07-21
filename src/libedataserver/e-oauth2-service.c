@@ -90,7 +90,20 @@ eos_default_guess_can_process (EOAuth2Service *service,
 	name_len = strlen (name);
 	hostname_len = strlen (hostname);
 
-	settings = g_settings_new ("org.gnome.evolution-data-server");
+	{
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 "org.gnome.evolution-data-server",
+							 FALSE);
+		settings = g_settings_new_full(schema, NULL, NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 	values = g_settings_get_strv (settings, "oauth2-services-hint");
 	g_object_unref (settings);
 

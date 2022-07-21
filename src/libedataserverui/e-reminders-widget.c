@@ -1986,7 +1986,21 @@ static void
 e_reminders_widget_init (ERemindersWidget *reminders)
 {
 	reminders->priv = e_reminders_widget_get_instance_private (reminders);
-	reminders->priv->settings = g_settings_new ("org.gnome.evolution-data-server.calendar");
+	{
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 "org.gnome.evolution-data-server.calendar",
+							 FALSE);
+		reminders->priv->settings = g_settings_new_full(schema, NULL,
+								NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 	reminders->priv->cancellable = g_cancellable_new ();
 	reminders->priv->is_empty = TRUE;
 	reminders->priv->is_mapped = FALSE;

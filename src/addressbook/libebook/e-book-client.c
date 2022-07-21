@@ -1983,7 +1983,20 @@ e_book_client_get_self (ESourceRegistry *registry,
 
 	*out_client = book_client;
 
-	settings = g_settings_new (SELF_UID_PATH_ID);
+	{
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 SELF_UID_PATH_ID,
+							 FALSE);
+		settings = g_settings_new_full(schema, NULL, NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 	uid = g_settings_get_string (settings, SELF_UID_KEY);
 	g_object_unref (settings);
 
@@ -2051,7 +2064,20 @@ e_book_client_set_self (EBookClient *client,
 	g_return_val_if_fail (
 		e_contact_get_const (contact, E_CONTACT_UID) != NULL, FALSE);
 
-	settings = g_settings_new (SELF_UID_PATH_ID);
+	{
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 SELF_UID_PATH_ID,
+							 FALSE);
+		settings = g_settings_new_full(schema, NULL, NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 	g_settings_set_string (
 		settings, SELF_UID_KEY,
 		e_contact_get_const (contact, E_CONTACT_UID));
@@ -2087,8 +2113,20 @@ e_book_client_is_self (EContact *contact)
 	 * unfortunately the API doesn't allow that.
 	 */
 	g_mutex_lock (&mutex);
-	if (!settings)
-		settings = g_settings_new (SELF_UID_PATH_ID);
+	if (!settings) {
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 SELF_UID_PATH_ID,
+							 FALSE);
+		settings = g_settings_new_full(schema, NULL, NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 	uid = g_settings_get_string (settings, SELF_UID_KEY);
 	g_mutex_unlock (&mutex);
 

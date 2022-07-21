@@ -1764,7 +1764,21 @@ e_source_registry_init (ESourceRegistry *registry)
 
 	g_mutex_init (&registry->priv->sources_lock);
 
-	registry->priv->settings = g_settings_new (GSETTINGS_SCHEMA);
+	{
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 GSETTINGS_SCHEMA,
+							 FALSE);
+		registry->priv->settings = g_settings_new_full(schema, NULL,
+							       NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 
 	g_signal_connect (
 		registry->priv->settings, "changed",

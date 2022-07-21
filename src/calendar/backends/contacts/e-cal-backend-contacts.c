@@ -1387,7 +1387,20 @@ e_cal_backend_contacts_init (ECalBackendContacts *cbc)
 		(GDestroyNotify) g_free,
 		(GDestroyNotify) contact_record_free);
 
-	cbc->priv->settings = g_settings_new ("org.gnome.evolution-data-server.calendar");
+	{
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 "org.gnome.evolution-data-server.calendar",
+							 FALSE);
+		cbc->priv->settings = g_settings_new_full(schema, NULL, NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 	cbc->priv->notifyid = 0;
 	cbc->priv->update_alarms_id = 0;
 	cbc->priv->alarm_enabled = FALSE;
