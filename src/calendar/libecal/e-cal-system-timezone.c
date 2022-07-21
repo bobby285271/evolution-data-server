@@ -28,7 +28,7 @@
 #ifdef HAVE_SOLARIS
 #define SYSTEM_ZONEINFODIR "/usr/share/lib/zoneinfo/tab"
 #else
-#define SYSTEM_ZONEINFODIR "/usr/share/zoneinfo"
+#define SYSTEM_ZONEINFODIR "@tzdata@/share/zoneinfo"
 #endif
 
 #define ETC_TIMEZONE        "/etc/timezone"
