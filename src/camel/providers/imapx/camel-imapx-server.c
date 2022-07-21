@@ -5573,7 +5573,20 @@ camel_imapx_server_skip_old_flags_update (CamelStore *store)
 	if (!skip_old_flags_update) {
 		GSettings *eds_settings;
 
-		eds_settings = g_settings_new ("org.gnome.evolution-data-server");
+		{
+			GSettingsSchemaSource *schema_source;
+			GSettingsSchema *schema;
+			schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+											g_settings_schema_source_get_default(),
+											TRUE,
+											NULL);
+			schema = g_settings_schema_source_lookup(schema_source,
+								"org.gnome.evolution-data-server",
+								FALSE);
+			eds_settings = g_settings_new_full(schema, NULL, NULL);
+			g_settings_schema_source_unref(schema_source);
+			g_settings_schema_unref(schema);
+		}
 
 		if (g_settings_get_boolean (eds_settings, "limit-operations-in-power-saver-mode")) {
 			GPowerProfileMonitor *power_monitor;

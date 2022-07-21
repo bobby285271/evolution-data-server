@@ -2555,7 +2555,20 @@ e_reminder_watcher_init (EReminderWatcher *watcher)
 
 	watcher->priv = e_reminder_watcher_get_instance_private (watcher);
 	watcher->priv->cancellable = g_cancellable_new ();
-	watcher->priv->settings = g_settings_new ("org.gnome.evolution-data-server.calendar");
+	{
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 "org.gnome.evolution-data-server.calendar",
+							 FALSE);
+		watcher->priv->settings = g_settings_new_full(schema, NULL, NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 	watcher->priv->scheduled = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, e_reminder_watcher_free_rd_slist);
 	watcher->priv->default_zone = e_cal_util_copy_timezone (zone);
 	watcher->priv->timers_enabled = TRUE;

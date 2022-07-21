@@ -362,7 +362,20 @@ void
 _camel_utils_initialize (void)
 {
 	G_LOCK (mi_user_headers);
-	mi_user_headers_settings = g_settings_new ("org.gnome.evolution-data-server");
+	{
+		GSettingsSchemaSource *schema_source;
+		GSettingsSchema *schema;
+		schema_source = g_settings_schema_source_new_from_directory("@ESD_GSETTINGS_PATH@",
+									    g_settings_schema_source_get_default(),
+									    TRUE,
+									    NULL);
+		schema = g_settings_schema_source_lookup(schema_source,
+							 "org.gnome.evolution-data-server",
+							 FALSE);
+		mi_user_headers_settings = g_settings_new_full(schema, NULL, NULL);
+		g_settings_schema_source_unref(schema_source);
+		g_settings_schema_unref(schema);
+	}
 	g_signal_connect (mi_user_headers_settings, "changed::camel-message-info-user-headers",
 		G_CALLBACK (mi_user_headers_settings_changed_cb), NULL);
 	G_UNLOCK (mi_user_headers);
